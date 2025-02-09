@@ -28,6 +28,7 @@ Warning: Fixtures MUST be declared with @action.uses({fixtures}) else your app w
 from yatl.helpers import A
 
 from py4web import URL, abort, action, redirect, request
+from py4web.utils.form import Form, FormStyleBulma
 
 from .common import (T, auth, authenticated, cache, db, flash, logger, session,
                      unauthenticated)
@@ -40,12 +41,10 @@ def index():
     message = T("Hello {first_name}").format(**user) if user else T("Hello")
     return dict(message=message)
 
-@action('add', method=['GET', 'POST']) 
-@action.uses('add.html', db, auth.user) 
+@action('add', method=['GET', 'POST'])
+@action.uses('add.html', db, auth.user)
 def add():
-    if request.method == 'GET':
-        return dict()
-    else:
-        print(request.params.get("thing_name"))
-        db.thing.insert(name=request.params.get("thing_name"))
-        redirect(URL('add'))
+    form = Form(db.product, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        redirect(URL('index'))
+    return(dict(form=form))
